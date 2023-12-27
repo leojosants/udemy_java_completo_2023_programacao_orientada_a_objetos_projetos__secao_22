@@ -1,6 +1,11 @@
 /*-------------------- packages --------------------*/
 package aplication;
 
+/*-------------------- libraries --------------------*/
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 /*-------------------- modules --------------------*/
 import domain.Person;
 
@@ -12,21 +17,40 @@ public class Program {
 		runProgram();
 	}
 
-	private static void runProgram() {
-		Person person_1 = instanceatePerson(generateId(), "Carlos", "carlos@gmail.com");
-		Person person_2 = instanceatePerson(generateId(), "Joaquim", "joaquim@gmail.com");
-		Person person_3 = instanceatePerson(generateId(), "Ana", "ana@gmail.com");
+	/*-------------------- functions --------------------*/
+	private static void runProgram() {		
+		EntityManagerFactory entity_manager_factory = Persistence.createEntityManagerFactory("exemplo-jpa");
+		EntityManager entity_manager = entity_manager_factory.createEntityManager();
 		
-		person_1.printPerson();
-		person_2.printPerson();
-		person_3.printPerson();
+		entity_manager.getTransaction().begin();	// start connection with db
+		entity_manager.getTransaction().commit();	// confirm changes
+		
+		example01(entity_manager);
+		example02(entity_manager);
+		displayMessageEndProgram();
+		
+		entity_manager.close();
+		entity_manager_factory.close();
 	}
 
-	private static Integer generateId() {
-		return (int)(Math.random() * 1000);
+	private static void example02(EntityManager entity_manager) {
+//		Person person = instanceatePerson(2, "Joaquim", "joaquim@gmail.com"); // erro
+		Person person = entity_manager.find(Person.class, 2);
+		entity_manager.getTransaction().begin();	// start connection with db
+		entity_manager.remove(person);
+		entity_manager.getTransaction().commit();	// confirm changes
+	}
+
+	private static void example01(EntityManager entity_manager) {
+		Person person_1 = entity_manager.find(Person.class, 2);	// recovering data
+		person_1.printPerson();
 	}
 
 	private static Person instanceatePerson(Integer id, String name, String email) {
 		return new Person(id, name, email);
+	}
+
+	private static void displayMessageEndProgram() {
+		System.out.println("\n---> fim do programa <---");
 	}
 }
